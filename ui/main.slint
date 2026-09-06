@@ -5,8 +5,8 @@ export component InputWindow inherits Window {
     height: 96px;
 
     title: "Latchnott";
-
     background: #1E2650;
+    always-on-top: true;
 
     callback save-note(string);
     callback focus-input();
@@ -39,5 +39,34 @@ export component InputWindow inherits Window {
 
     focus-input() => {
         input.focus();
+    }
+}
+
+export component LatchnottTray inherits SystemTrayIcon {
+    icon: @image-url("../assets/tray.svg");
+    tooltip: "Latchnott";
+    visible: true;
+
+    callback new-note();
+    callback quit();
+
+    Menu {
+        MenuItem {
+            title: "New note";
+
+            activated => {
+                root.new-note();
+            }
+        }
+
+        MenuSeparator { }
+
+        MenuItem {
+            title: "Quit";
+
+            activated => {
+                root.quit();
+            }
+        }
     }
 }
