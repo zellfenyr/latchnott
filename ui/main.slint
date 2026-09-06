@@ -1,0 +1,43 @@
+import { LineEdit } from "std-widgets.slint";
+
+export component InputWindow inherits Window {
+    width: 520px;
+    height: 96px;
+
+    title: "Latchnott";
+
+    background: #1E2650;
+
+    callback save-note(string);
+    callback focus-input();
+
+    in-out property <string> text: "";
+    in-out property <string> error-message: "";
+
+    VerticalLayout {
+        padding: 16px;
+        spacing: 8px;
+
+        input := LineEdit {
+            text <=> root.text;
+            placeholder-text: "Write a note…";
+
+            font-size: 18px;
+            font-family: "";
+
+            accepted(text) => {
+                root.save-note(text);
+            }
+        }
+
+        if root.error-message != "": Text {
+            text: root.error-message;
+            color: #FFFFFF;
+            font-size: 12px;
+        }
+    }
+
+    focus-input() => {
+        input.focus();
+    }
+}
