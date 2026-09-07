@@ -13,7 +13,6 @@ const MAX_LOG_SIZE: u64 = 1024 * 1024;
 #[derive(Debug, Clone, Copy)]
 pub enum LogLevel {
     Info,
-    Warn,
     Error,
 }
 
@@ -21,7 +20,6 @@ impl LogLevel {
     fn as_str(self) -> &'static str {
         match self {
             Self::Info => "INFO",
-            Self::Warn => "WARN",
             Self::Error => "ERROR",
         }
     }
@@ -52,10 +50,6 @@ impl Logger {
 
     pub fn info(&self, message: &str) {
         self.log(LogLevel::Info, message);
-    }
-
-    pub fn warn(&self, message: &str) {
-        self.log(LogLevel::Warn, message);
     }
 
     pub fn error(&self, message: &str) {
@@ -192,21 +186,6 @@ mod tests {
 
         assert!(contents.contains("[INFO] startup completed"));
         assert!(contents.contains("T"));
-
-        cleanup(&data_dir);
-    }
-
-    #[test]
-    fn writes_warning_log_line() {
-        let data_dir = temporary_data_dir();
-
-        let logger = Logger::new(&data_dir).expect("logger should initialize");
-        logger.warn("empty note input discarded");
-
-        let contents =
-            fs::read_to_string(data_dir.join(LOG_FILE_NAME)).expect("log file should be readable");
-
-        assert!(contents.contains("[WARN] empty note input discarded"));
 
         cleanup(&data_dir);
     }

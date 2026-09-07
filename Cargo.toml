@@ -10,7 +10,7 @@ build = "build.rs"
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-slint = "1.17"
+slint = { version = "1.17", features = ["unstable-winit-030"] }
 time = { version = "0.3", features = ["formatting", "parsing"] }
 toml = "1.1"
 uuid = { version = "1.26", features = ["v7"] }

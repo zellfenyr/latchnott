@@ -3,6 +3,7 @@ use std::path::PathBuf;
 use std::rc::Rc;
 use std::sync::Arc;
 
+use slint::winit_030::WinitWindowAccessor;
 use slint::{ComponentHandle, SharedString};
 
 use crate::application::CreateNote;
@@ -60,7 +61,7 @@ pub fn run(
                 }
             }
             Ok(None) => {
-                logger_for_save.warn("empty note input discarded");
+                logger_for_save.info("empty note input discarded");
 
                 if let Some(window) = window_for_save.upgrade() {
                     window.set_text(SharedString::default());
@@ -118,6 +119,10 @@ pub fn run(
                     return;
                 }
 
+                let _ = window.window().with_winit_window(|winit_window| {
+                    winit_window.focus_window();
+                });
+
                 window.invoke_focus_input();
             }
         }) {
@@ -141,6 +146,10 @@ pub fn run(
                 logger_for_tray.error(&format!("failed to show input window from tray: {error}"));
                 return;
             }
+
+            let _ = window.window().with_winit_window(|winit_window| {
+                winit_window.focus_window();
+            });
 
             window.invoke_focus_input();
         }
