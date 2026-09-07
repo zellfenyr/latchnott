@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use std::rc::Rc;
 use std::sync::Arc;
 
-use slint::winit_030::WinitWindowAccessor;
+use slint::winit_030::{EventResult, WinitWindowAccessor, winit};
 use slint::{ComponentHandle, PhysicalPosition, SharedString, WindowPosition};
 
 use crate::application::CreateNote;
@@ -27,6 +27,20 @@ pub fn run(
         InputWindow::new().map_err(|error| format!("failed to create input window: {error}"))?;
 
     window.set_font_family(SharedString::from(font_family.unwrap_or("")));
+
+    let window_for_focus_events = window.as_weak();
+
+    window
+        .window()
+        .on_winit_window_event(move |_window, event| {
+            if let winit::event::WindowEvent::Focused(true) = event {
+                if let Some(window) = window_for_focus_events.upgrade() {
+                    window.invoke_focus_input();
+                }
+            }
+
+            EventResult::Propagate
+        });
 
     let tray =
         LatchnottTray::new().map_err(|error| format!("failed to create system tray: {error}"))?;
@@ -121,6 +135,10 @@ pub fn run(
 
                 center_input_window(&window, &logger_for_ui);
 
+                window.window().with_winit_window(|winit_window| {
+                    winit_window.focus_window();
+                });
+
                 window.invoke_focus_input();
             }
         }) {
@@ -146,6 +164,10 @@ pub fn run(
             }
 
             center_input_window(&window, &logger_for_tray);
+
+            window.window().with_winit_window(|winit_window| {
+                winit_window.focus_window();
+            });
 
             window.invoke_focus_input();
         }
