@@ -12,13 +12,20 @@ use crate::storage::JsonNoteRepository;
 
 slint::include_modules!();
 
-pub fn run(storage_path: PathBuf, shortcut: &str, logger: Logger) -> Result<(), String> {
+pub fn run(
+    storage_path: PathBuf,
+    shortcut: &str,
+    font_family: Option<&str>,
+    logger: Logger,
+) -> Result<(), String> {
     let logger = Arc::new(logger);
 
     logger.info("creating input window");
 
     let window =
         InputWindow::new().map_err(|error| format!("failed to create input window: {error}"))?;
+
+    window.set_font_family(SharedString::from(font_family.unwrap_or("")));
 
     let tray =
         LatchnottTray::new().map_err(|error| format!("failed to create system tray: {error}"))?;
@@ -53,7 +60,7 @@ pub fn run(storage_path: PathBuf, shortcut: &str, logger: Logger) -> Result<(), 
                 }
             }
             Ok(None) => {
-                logger_for_save.info("empty note input discarded");
+                logger_for_save.warn("empty note input discarded");
 
                 if let Some(window) = window_for_save.upgrade() {
                     window.set_text(SharedString::default());

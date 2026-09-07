@@ -90,7 +90,7 @@ pub fn load_default() -> Result<Configuration, ConfigurationError> {
     let path = default_configuration_path()?;
 
     match std::fs::read_to_string(&path) {
-        Ok(contents) => load_from_str(&contents, path.parent().unwrap_or_else(|| Path::new("."))),
+        Ok(_) => load_from_path(&path),
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
             load_from_str("", path.parent().unwrap_or_else(|| Path::new(".")))
         }
@@ -208,9 +208,9 @@ fn default_data_dir() -> Result<PathBuf, ConfigurationError> {
             ConfigurationError::new("APPDATA is not available; cannot determine default data_dir")
         })?;
 
-        return Ok(PathBuf::from(app_data)
+        Ok(PathBuf::from(app_data)
             .join(APPLICATION_DIRECTORY_NAME)
-            .join(DEFAULT_DATA_DIRECTORY_NAME));
+            .join(DEFAULT_DATA_DIRECTORY_NAME))
     }
 
     #[cfg(not(windows))]
@@ -356,6 +356,7 @@ font_family = "  Segoe UI  "
     #[test]
     fn default_configuration_path_is_next_to_executable() {
         let executable = env::current_exe().expect("current executable path should be available");
+
         let executable_directory = executable
             .parent()
             .expect("executable path should have a parent directory");
@@ -375,5 +376,40 @@ font_family = "  Segoe UI  "
 
         assert_eq!(configuration.shortcut(), DEFAULT_SHORTCUT);
         assert_eq!(configuration.font_family(), None);
+    }
+
+    #[test]
+    fn loads_configuration_from_file() {
+        let directory =
+            std::env::temp_dir().join(format!("latchnott-config-test-{}", std::process::id()));
+
+        let path = directory.join(CONFIGURATION_FILE_NAME);
+
+        std::fs::create_dir_all(&directory)
+            .expect("test configuration directory should be created");
+
+        std::fs::write(
+            &path,
+            r#"
+[hotkey]
+shortcut = "Ctrl+Shift+Alt+T"
+
+[storage]
+data_dir = "data"
+
+[ui]
+font_family = "Segoe UI"
+"#,
+        )
+        .expect("test configuration should be written");
+
+        let configuration = load_from_path(&path).expect("configuration file should load");
+
+        assert_eq!(configuration.shortcut(), "Ctrl+Shift+Alt+T");
+        assert_eq!(configuration.data_dir(), directory.join("data"));
+        assert_eq!(configuration.font_family(), Some("Segoe UI"));
+
+        let _ = std::fs::remove_file(&path);
+        let _ = std::fs::remove_dir(&directory);
     }
 }

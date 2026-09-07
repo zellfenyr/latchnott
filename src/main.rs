@@ -44,7 +44,12 @@ fn run() -> Result<(), String> {
 
                 let storage_path = notes_storage_path(data_dir);
 
-                let result = gui::run(storage_path, configuration.shortcut(), logger);
+                let result = gui::run(
+                    storage_path,
+                    configuration.shortcut(),
+                    configuration.font_family(),
+                    logger,
+                );
 
                 if let Err(error) = &result {
                     eprintln!("Latchnott runtime error: {error}");
@@ -69,7 +74,12 @@ fn run() -> Result<(), String> {
     {
         let storage_path = notes_storage_path(data_dir);
 
-        gui::run(storage_path, configuration.shortcut(), logger)
+        gui::run(
+            storage_path,
+            configuration.shortcut(),
+            configuration.font_family(),
+            logger,
+        )
     }
 }
 

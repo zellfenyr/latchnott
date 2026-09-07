@@ -2,8 +2,8 @@ use std::fmt;
 use std::path::Path;
 
 use windows_sys::Win32::System::Registry::{
-    HKEY, HKEY_CURRENT_USER, KEY_QUERY_VALUE, KEY_SET_VALUE, REG_OPTION_NON_VOLATILE, REG_SZ,
-    RegCloseKey, RegCreateKeyExW, RegDeleteValueW, RegQueryValueExW, RegSetValueExW,
+    HKEY, HKEY_CURRENT_USER, KEY_SET_VALUE, REG_OPTION_NON_VOLATILE, REG_SZ, RegCloseKey,
+    RegCreateKeyExW, RegSetValueExW,
 };
 
 const RUN_KEY: &str = r"Software\Microsoft\Windows\CurrentVersion\Run";
@@ -65,107 +65,6 @@ impl Autostart {
 
         Ok(())
     }
-
-    pub fn disable() -> Result<(), AutostartError> {
-        let key = match open_run_key(KEY_SET_VALUE | KEY_QUERY_VALUE) {
-            Ok(key) => key,
-            Err(error) if error.message.contains("Win32 error 2") => return Ok(()),
-            Err(error) => return Err(error),
-        };
-
-        let value_name = wide_string(VALUE_NAME);
-
-        let result = unsafe { RegDeleteValueW(key, value_name.as_ptr()) };
-
-        unsafe {
-            RegCloseKey(key);
-        }
-
-        const ERROR_FILE_NOT_FOUND: u32 = 2;
-
-        if result != 0 && result != ERROR_FILE_NOT_FOUND {
-            return Err(AutostartError::win32("RegDeleteValueW", result));
-        }
-
-        Ok(())
-    }
-
-    pub fn is_enabled() -> Result<bool, AutostartError> {
-        let key = match open_run_key(KEY_QUERY_VALUE) {
-            Ok(key) => key,
-            Err(error) if error.message.contains("Win32 error 2") => return Ok(false),
-            Err(error) => return Err(error),
-        };
-
-        let value_name = wide_string(VALUE_NAME);
-
-        let mut value_type = 0u32;
-        let mut byte_length = 0u32;
-
-        let query_size_result = unsafe {
-            RegQueryValueExW(
-                key,
-                value_name.as_ptr(),
-                std::ptr::null(),
-                &mut value_type,
-                std::ptr::null_mut(),
-                &mut byte_length,
-            )
-        };
-
-        const ERROR_FILE_NOT_FOUND: u32 = 2;
-
-        if query_size_result == ERROR_FILE_NOT_FOUND {
-            unsafe {
-                RegCloseKey(key);
-            }
-
-            return Ok(false);
-        }
-
-        if query_size_result != 0 {
-            unsafe {
-                RegCloseKey(key);
-            }
-
-            return Err(AutostartError::win32("RegQueryValueExW", query_size_result));
-        }
-
-        if value_type != REG_SZ {
-            unsafe {
-                RegCloseKey(key);
-            }
-
-            return Err(AutostartError::new(
-                "Latchnott autostart registry value has unexpected type",
-            ));
-        }
-
-        let mut buffer = vec![0u16; (byte_length as usize).div_ceil(std::mem::size_of::<u16>())];
-
-        let result = unsafe {
-            RegQueryValueExW(
-                key,
-                value_name.as_ptr(),
-                std::ptr::null(),
-                &mut value_type,
-                buffer.as_mut_ptr() as *mut u8,
-                &mut byte_length,
-            )
-        };
-
-        unsafe {
-            RegCloseKey(key);
-        }
-
-        if result != 0 {
-            return Err(AutostartError::win32("RegQueryValueExW", result));
-        }
-
-        let stored_command = utf16_to_string(&buffer);
-
-        Ok(!stored_command.is_empty())
-    }
 }
 
 fn open_run_key(access: u32) -> Result<HKEY, AutostartError> {
@@ -219,15 +118,6 @@ fn wide_string(value: &str) -> Vec<u16> {
     value.encode_utf16().chain(std::iter::once(0)).collect()
 }
 
-fn utf16_to_string(value: &[u16]) -> String {
-    let length = value
-        .iter()
-        .position(|character| *character == 0)
-        .unwrap_or(value.len());
-
-    String::from_utf16_lossy(&value[..length])
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -249,14 +139,6 @@ mod tests {
     }
 
     #[test]
-    fn converts_utf16_with_terminator() {
-        let value = wide_string("Latchnott");
-
-        assert_eq!(utf16_to_string(&value), "Latchnott");
-        assert_eq!(value.last(), Some(&0));
-    }
-
-    #[test]
     fn rejects_overly_long_startup_command() {
         let executable = Path::new(
             r"C:\this-is-a-very-long-path\this-is-a-very-long-path\this-is-a-very-long-path\this-is-a-very-long-path\this-is-a-very-long-path\this-is-a-very-long-path\this-is-a-very-long-path\this-is-a-very-long-path\this-is-a-very-long-path\this-is-a-very-long-path\this-is-a-very-long-path\this-is-a-very-long-path\latchnott.exe",
@@ -265,5 +147,13 @@ mod tests {
         let result = startup_command(executable);
 
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn wide_string_is_null_terminated() {
+        let value = wide_string(VALUE_NAME);
+
+        assert_eq!(value.last(), Some(&0));
+        assert!(!value.is_empty());
     }
 }

@@ -62,10 +62,6 @@ impl Logger {
         self.log(LogLevel::Error, message);
     }
 
-    pub fn path(&self) -> &Path {
-        &self.path
-    }
-
     fn log(&self, level: LogLevel, message: &str) {
         let timestamp = OffsetDateTime::now_utc()
             .format(&Rfc3339)
@@ -109,7 +105,7 @@ impl Logger {
         incoming_size: u64,
     ) -> io::Result<()> {
         let Some(file) = state.file.as_mut() else {
-            return Err(io::Error::new(io::ErrorKind::Other, "log file is not open"));
+            return Err(io::Error::other("log file is not open"));
         };
 
         let current_size = file.metadata()?.len();
@@ -123,7 +119,7 @@ impl Logger {
         let file = state
             .file
             .take()
-            .ok_or_else(|| io::Error::new(io::ErrorKind::Other, "log file disappeared"))?;
+            .ok_or_else(|| io::Error::other("log file disappeared"))?;
 
         drop(file);
 
@@ -154,11 +150,10 @@ impl Logger {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::time::{SystemTime, UNIX_EPOCH};
 
     fn temporary_data_dir() -> PathBuf {
-        let timestamp = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
+        let timestamp = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
             .expect("system clock should be after UNIX epoch")
             .as_nanos();
 
@@ -178,9 +173,9 @@ mod tests {
     fn creates_log_file() {
         let data_dir = temporary_data_dir();
 
-        let logger = Logger::new(&data_dir).expect("logger should initialize");
+        let _logger = Logger::new(&data_dir).expect("logger should initialize");
 
-        assert!(logger.path().is_file());
+        assert!(data_dir.join(LOG_FILE_NAME).is_file());
 
         cleanup(&data_dir);
     }
@@ -192,10 +187,26 @@ mod tests {
         let logger = Logger::new(&data_dir).expect("logger should initialize");
         logger.info("startup completed");
 
-        let contents = fs::read_to_string(logger.path()).expect("log file should be readable");
+        let contents =
+            fs::read_to_string(data_dir.join(LOG_FILE_NAME)).expect("log file should be readable");
 
         assert!(contents.contains("[INFO] startup completed"));
         assert!(contents.contains("T"));
+
+        cleanup(&data_dir);
+    }
+
+    #[test]
+    fn writes_warning_log_line() {
+        let data_dir = temporary_data_dir();
+
+        let logger = Logger::new(&data_dir).expect("logger should initialize");
+        logger.warn("empty note input discarded");
+
+        let contents =
+            fs::read_to_string(data_dir.join(LOG_FILE_NAME)).expect("log file should be readable");
+
+        assert!(contents.contains("[WARN] empty note input discarded"));
 
         cleanup(&data_dir);
     }
@@ -210,22 +221,24 @@ mod tests {
             let mut file = OpenOptions::new()
                 .write(true)
                 .truncate(true)
-                .open(logger.path())
+                .open(data_dir.join(LOG_FILE_NAME))
                 .expect("log file should be writable");
 
             let content = vec![b'x'; MAX_LOG_SIZE as usize];
+
             file.write_all(&content)
                 .expect("test log data should be written");
         }
 
         logger.info("after rotation");
 
+        let current_path = data_dir.join(LOG_FILE_NAME);
         let rotated_path = data_dir.join(ROTATED_LOG_FILE_NAME);
 
         assert!(rotated_path.is_file());
-        assert!(logger.path().is_file());
+        assert!(current_path.is_file());
 
-        let current = fs::read_to_string(logger.path()).expect("current log should be readable");
+        let current = fs::read_to_string(current_path).expect("current log should be readable");
 
         assert!(current.contains("after rotation"));
         assert!(
@@ -246,7 +259,8 @@ mod tests {
         let logger = Logger::new(&data_dir).expect("logger should initialize");
         logger.info("note saved successfully");
 
-        let contents = fs::read_to_string(logger.path()).expect("log file should be readable");
+        let contents =
+            fs::read_to_string(data_dir.join(LOG_FILE_NAME)).expect("log file should be readable");
 
         assert!(!contents.contains("Test note"));
         assert!(contents.contains("note saved successfully"));

@@ -7,6 +7,7 @@ export component InputWindow inherits Window {
     title: "Latchnott";
     background: #1E2650;
     always-on-top: true;
+    forward-focus: input;
 
     callback save-note(string);
     callback cancel-note();
@@ -14,6 +15,7 @@ export component InputWindow inherits Window {
 
     in-out property <string> text: "";
     in-out property <string> error-message: "";
+    in-out property <string> font-family: "";
 
     VerticalLayout {
         padding: 16px;
@@ -24,7 +26,7 @@ export component InputWindow inherits Window {
             placeholder-text: "Write a note…";
 
             font-size: 18px;
-            font-family: "";
+            font-family: root.font-family;
 
             accepted(text) => {
                 root.save-note(text);
