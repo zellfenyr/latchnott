@@ -1,7 +1,168 @@
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Uploaded to: SVG Repo, www.svgrepo.com, Transformed by: SVG Repo Mixer Tools -->
-<svg width="256px" height="256px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g id="SVGRepo_bgCarrier" stroke-width="0"/>
-<g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"/>
-<g id="SVGRepo_iconCarrier"> <path fill-rule="evenodd" clip-rule="evenodd" d="M2.54497 8.73005C2 9.79961 2 11.1997 2 14C2 16.8003 2 18.2004 2.54497 19.27C3.02433 20.2108 3.78924 20.9757 4.73005 21.455C5.79961 22 7.19974 22 10 22H14C16.8003 22 18.2004 22 19.27 21.455C20.2108 20.9757 20.9757 20.2108 21.455 19.27C22 18.2004 22 16.8003 22 14C22 11.1997 22 9.79961 21.455 8.73005C20.9757 7.78924 20.2108 7.02433 19.27 6.54497C18.2004 6 16.8003 6 14 6H10C7.19974 6 5.79961 6 4.73005 6.54497C3.78924 7.02433 3.02433 7.78924 2.54497 8.73005ZM15.0595 12.4995C15.3353 12.1905 15.3085 11.7164 14.9995 11.4406C14.6905 11.1647 14.2164 11.1915 13.9406 11.5005L10.9286 14.8739L10.0595 13.9005C9.78359 13.5915 9.30947 13.5647 9.0005 13.8406C8.69152 14.1164 8.66468 14.5905 8.94055 14.8995L10.3691 16.4995C10.5114 16.6589 10.7149 16.75 10.9286 16.75C11.1422 16.75 11.3457 16.6589 11.488 16.4995L15.0595 12.4995Z" fill="#d34516"/> <path opacity="0.5" d="M11.9993 2C16.7133 2 19.0704 2 20.5348 3.46447C21.2923 4.22195 21.658 5.21824 21.8345 6.65598V10H2.16406V6.65598C2.3406 5.21824 2.70628 4.22195 3.46377 3.46447C4.92823 2 7.28525 2 11.9993 2Z" fill="#d34516"/> </g>
-</svg>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="64" height="64" viewBox="0 0 64 64"
+     fill="none">
+  <defs>
+    <!-- Основной глянцевый градиент: повторяет теплую палитру исходной иконки -->
+    <linearGradient id="boltBase" x1="27" y1="4" x2="28" y2="57" gradientUnits="userSpaceOnUse">
+      <stop offset="0"   stop-color="#FFE0A0"/>
+      <stop offset="0.18" stop-color="#FFB347"/>
+      <stop offset="0.50" stop-color="#FF711C"/>
+      <stop offset="0.78" stop-color="#F83D21"/>
+      <stop offset="1"   stop-color="#D34516"/>
+    </linearGradient>
+
+    <linearGradient id="boltHighlight" x1="18" y1="7" x2="43" y2="45" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.92"/>
+      <stop offset="0.33" stop-color="#FFF7E8" stop-opacity="0.52"/>
+      <stop offset="0.72" stop-color="#FFFFFF" stop-opacity="0.08"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+
+    <linearGradient id="edgeGlow" x1="9" y1="28" x2="50" y2="30" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFE4C2" stop-opacity="0.95"/>
+      <stop offset="0.45" stop-color="#FFBB55" stop-opacity="0.65"/>
+      <stop offset="1" stop-color="#FFF2CF" stop-opacity="0.88"/>
+    </linearGradient>
+
+    <linearGradient id="tipGlow" x1="17" y1="39" x2="23" y2="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FF6E51" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#FFB18F" stop-opacity="0.2"/>
+    </linearGradient>
+
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="180%">
+      <feDropShadow dx="0" dy="1.3" stdDeviation="1.15" flood-color="#D34516" flood-opacity="0.28"/>
+    </filter>
+
+    <filter id="softGlow" x="-35%" y="-35%" width="170%" height="170%">
+      <feGaussianBlur stdDeviation="1.1" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="1 0 0 0 1
+                0 0.35 0 0 0.08
+                0 0 0.1 0 0
+                0 0 0 0.55 0"/>
+    </filter>
+
+    <clipPath id="boltClip">
+      <path d="M46 4
+               C47.2 4 47.9 5.1 47.3 6.25
+               L40.0 20.65
+               L50.55 21.2
+               C52.0 21.28 52.8 22.05 52.75 23.45
+               C52.72 24.25 52.25 24.95 51.58 25.54
+               L19.05 55.05
+               C18.0 56.02 16.55 56.05 16.15 54.85
+               C16.0 54.38 16.15 53.78 16.45 53.18
+               L24.65 34.55
+               L9.95 34.28
+               C8.65 34.25 7.92 33.42 7.95 32.2
+               C7.98 31.75 8.14 31.25 8.43 30.75
+               L23.25 6.35
+               C23.95 5.2 24.65 4 26.1 4
+               Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- Тонкая мягкая подсветка/ореол -->
+  <path d="M46 4
+           C47.2 4 47.9 5.1 47.3 6.25
+           L40.0 20.65
+           L50.55 21.2
+           C52.0 21.28 52.8 22.05 52.75 23.45
+           C52.72 24.25 52.25 24.95 51.58 25.54
+           L19.05 55.05
+           C18.0 56.02 16.55 56.05 16.15 54.85
+           C16.0 54.38 16.15 53.78 16.45 53.18
+           L24.65 34.55
+           L9.95 34.28
+           C8.65 34.25 7.92 33.42 7.95 32.2
+           C7.98 31.75 8.14 31.25 8.43 30.75
+           L23.25 6.35
+           C23.95 5.2 24.65 4 26.1 4
+           Z"
+        fill="none" stroke="#FF6A22" stroke-width="2.5"
+        opacity="0.18" filter="url(#softGlow)"/>
+
+  <g filter="url(#shadow)">
+    <!-- Основной силуэт -->
+    <path d="M46 4
+             C47.2 4 47.9 5.1 47.3 6.25
+             L40.0 20.65
+             L50.55 21.2
+             C52.0 21.28 52.8 22.05 52.75 23.45
+             C52.72 24.25 52.25 24.95 51.58 25.54
+             L19.05 55.05
+             C18.0 56.02 16.55 56.05 16.15 54.85
+             C16.0 54.38 16.15 53.78 16.45 53.18
+             L24.65 34.55
+             L9.95 34.28
+             C8.65 34.25 7.92 33.42 7.95 32.2
+             C7.98 31.75 8.14 31.25 8.43 30.75
+             L23.25 6.35
+             C23.95 5.2 24.65 4 26.1 4
+             Z"
+          fill="url(#boltBase)"/>
+
+    <!-- Внутренний глянцевый перелив -->
+    <g clip-path="url(#boltClip)">
+      <ellipse cx="28" cy="20" rx="22" ry="30"
+               transform="rotate(23 28 20)"
+               fill="url(#boltHighlight)" opacity="0.9"/>
+      <path d="M10 32.6
+               C13 31.8 19 31.8 25 32.4
+               C31 33 36 30 42 25
+               C44 23.4 47 22.7 50 22.6
+               C46 25.5 40 28.8 34 34.5
+               L19 48.5
+               L24.6 34.6
+               L10 34.3 Z"
+            fill="#FFFAF0" opacity="0.10"/>
+      <path d="M25 7
+               L45.5 6.6
+               L39 19.7
+               L25 29
+               L13 30.5
+               Z"
+            fill="#FFF7E8" opacity="0.18"/>
+      <path d="M17 51
+               L22.8 39
+               C24 36.4 26.3 34.7 28.3 33.4"
+            fill="none" stroke="url(#tipGlow)" stroke-width="2.1"
+            stroke-linecap="round" opacity="0.85"/>
+    </g>
+
+    <!-- Светлый ободок по краям -->
+    <path d="M46 4
+             C47.2 4 47.9 5.1 47.3 6.25
+             L40.0 20.65
+             L50.55 21.2
+             C52.0 21.28 52.8 22.05 52.75 23.45
+             C52.72 24.25 52.25 24.95 51.58 25.54
+             L19.05 55.05
+             C18.0 56.02 16.55 56.05 16.15 54.85
+             C16.0 54.38 16.15 53.78 16.45 53.18
+             L24.65 34.55
+             L9.95 34.28
+             C8.65 34.25 7.92 33.42 7.95 32.2
+             C7.98 31.75 8.14 31.25 8.43 30.75
+             L23.25 6.35
+             C23.95 5.2 24.65 4 26.1 4
+             Z"
+          fill="none"
+          stroke="url(#edgeGlow)"
+          stroke-width="0.95"
+          stroke-linejoin="round"
+          opacity="0.9"/>
+  </g>
+
+  <!-- Точечный блик для эффекта стекла -->
+  <path d="M25.7 6.8
+           L44.8 6.55
+           C45.8 6.54 46.1 7.1 45.55 8.0
+           L39.8 18.8
+           L28.8 22.6
+           C31.0 18.6 34.5 12.0 36.2 8.4
+           Z"
+        fill="#FFFDF6" opacity="0.30"
+        clip-path="url(#boltClip)"/>
+</svg>

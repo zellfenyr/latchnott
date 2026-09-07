@@ -1,0 +1,8 @@
+[hotkey]
+shortcut = "Ctrl+Shift+Alt+L"
+
+[storage]
+data_dir = "data"
+
+[ui]
+font_family = "Fira Code"

@@ -16,7 +16,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install Rust 1.98.1
         shell: pwsh
@@ -44,3 +44,42 @@ jobs:
 
       - name: Build release
         run: cargo build --release
+
+      - name: Prepare ZIP package
+        shell: pwsh
+        run: |
+          $packageDir = Join-Path $env:RUNNER_TEMP "latchnott-package"
+          $zipPath = Join-Path $env:GITHUB_WORKSPACE "latchnott-windows-x86_64.zip"
+
+          if (Test-Path $packageDir) {
+            Remove-Item $packageDir -Recurse -Force
+          }
+
+          New-Item -ItemType Directory -Path $packageDir | Out-Null
+
+          Copy-Item `
+            "target\release\latchnott.exe" `
+            (Join-Path $packageDir "latchnott.exe")
+
+          if (Test-Path "configuration.toml.example") {
+            Copy-Item `
+              "configuration.toml.example" `
+              (Join-Path $packageDir "configuration.toml.example")
+          }
+
+          if (Test-Path $zipPath) {
+            Remove-Item $zipPath -Force
+          }
+
+          Compress-Archive `
+            -Path (Join-Path $packageDir "*") `
+            -DestinationPath $zipPath `
+            -CompressionLevel Optimal
+
+      - name: Upload ZIP artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: latchnott-windows-x86_64
+          path: latchnott-windows-x86_64.zip
+          if-no-files-found: error
+          retention-days: 14
