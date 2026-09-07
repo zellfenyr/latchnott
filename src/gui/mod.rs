@@ -4,7 +4,7 @@ use std::rc::Rc;
 use std::sync::Arc;
 
 use slint::winit_030::WinitWindowAccessor;
-use slint::{ComponentHandle, SharedString};
+use slint::{ComponentHandle, PhysicalPosition, SharedString, WindowPosition};
 
 use crate::application::CreateNote;
 use crate::logging::Logger;
@@ -119,9 +119,7 @@ pub fn run(
                     return;
                 }
 
-                let _ = window.window().with_winit_window(|winit_window| {
-                    winit_window.focus_window();
-                });
+                center_input_window(&window, &logger_for_ui);
 
                 window.invoke_focus_input();
             }
@@ -147,9 +145,7 @@ pub fn run(
                 return;
             }
 
-            let _ = window.window().with_winit_window(|winit_window| {
-                winit_window.focus_window();
-            });
+            center_input_window(&window, &logger_for_tray);
 
             window.invoke_focus_input();
         }
@@ -189,4 +185,36 @@ pub fn run(
     logger.info("shutting down Latchnott");
 
     result
+}
+
+fn center_input_window(window: &InputWindow, logger: &Logger) {
+    let position = window.window().with_winit_window(|winit_window| {
+        let monitor = winit_window
+            .current_monitor()
+            .or_else(|| winit_window.primary_monitor())?;
+
+        let monitor_position = monitor.position();
+        let monitor_size = monitor.size();
+        let window_size = winit_window.outer_size();
+
+        let x = monitor_position.x + (monitor_size.width as i32 - window_size.width as i32) / 2;
+
+        let y = monitor_position.y + (monitor_size.height as i32 - window_size.height as i32) / 2;
+
+        Some((x, y))
+    });
+
+    match position {
+        Some(Some((x, y))) => {
+            window
+                .window()
+                .set_position(WindowPosition::Physical(PhysicalPosition::new(x, y)));
+        }
+        Some(None) => {
+            logger.info("unable to determine monitor for input window; keeping platform position");
+        }
+        None => {
+            logger.info("native Winit window is unavailable; keeping platform position");
+        }
+    }
 }
