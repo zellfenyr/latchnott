@@ -1,3 +1,4 @@
+pub mod autostart;
 pub mod hotkey;
 pub mod ipc;
 pub mod runtime;
