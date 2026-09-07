@@ -22,6 +22,7 @@ jobs:
         shell: pwsh
         run: |
           rustup toolchain install 1.98.1 --profile minimal
+          rustup component add rustfmt clippy --toolchain 1.98.1
           rustup default 1.98.1
 
       - name: Show toolchain
@@ -29,6 +30,8 @@ jobs:
         run: |
           rustc --version
           cargo --version
+          rustfmt --version
+          cargo clippy --version
 
       - name: Check formatting
         run: cargo fmt --check
