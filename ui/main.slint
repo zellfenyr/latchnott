@@ -9,6 +9,7 @@ export component InputWindow inherits Window {
     always-on-top: true;
 
     callback save-note(string);
+    callback cancel-note();
     callback focus-input();
 
     in-out property <string> text: "";
@@ -27,6 +28,14 @@ export component InputWindow inherits Window {
 
             accepted(text) => {
                 root.save-note(text);
+            }
+
+            key-pressed(event) => {
+                if event.text == Key.Escape {
+                    root.cancel-note();
+                    accept
+                }
+                reject
             }
         }
 

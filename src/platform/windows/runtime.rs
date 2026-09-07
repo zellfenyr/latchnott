@@ -3,6 +3,8 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, mpsc};
 use std::thread::{self, JoinHandle};
 
+use crate::logging::Logger;
+
 use super::hotkey::{GlobalHotkey, HotkeyError};
 use super::ipc::{IpcCommand, IpcError, IpcServer};
 
@@ -46,6 +48,7 @@ pub struct PlatformRuntime {
 impl PlatformRuntime {
     pub fn start(
         shortcut: &str,
+        logger: Arc<Logger>,
         on_show_input: impl Fn() + Send + Sync + 'static,
     ) -> Result<Self, PlatformRuntimeError> {
         let callback = Arc::new(on_show_input);
@@ -56,9 +59,12 @@ impl PlatformRuntime {
             hotkey_callback();
         })?;
 
+        logger.info("global hotkey registered");
+
         let stop = Arc::new(AtomicBool::new(false));
         let stop_for_thread = Arc::clone(&stop);
         let ipc_callback = Arc::clone(&callback);
+        let logger_for_thread = Arc::clone(&logger);
 
         let (ready_sender, ready_receiver) = mpsc::sync_channel(1);
 
@@ -67,15 +73,21 @@ impl PlatformRuntime {
             .spawn(move || {
                 let server = IpcServer::new();
 
+                logger_for_thread.info("IPC server thread started");
+
                 if let Err(error) =
                     server.run_until_stopped(stop_for_thread, ready_sender, move |command| {
                         match command {
-                            IpcCommand::ShowInput => ipc_callback(),
+                            IpcCommand::ShowInput => {
+                                ipc_callback();
+                            }
                         }
                     })
                 {
-                    eprintln!("Latchnott IPC error: {error}");
+                    logger_for_thread.error(&format!("IPC server stopped with error: {error}"));
                 }
+
+                logger_for_thread.info("IPC server thread stopped");
             })
             .map_err(|error| {
                 PlatformRuntimeError::Thread(format!("failed to spawn IPC thread: {error}"))
@@ -95,6 +107,8 @@ impl PlatformRuntime {
 
             return Err(PlatformRuntimeError::Ipc(error));
         }
+
+        logger.info("IPC server initialized");
 
         Ok(Self {
             hotkey: Some(hotkey),
