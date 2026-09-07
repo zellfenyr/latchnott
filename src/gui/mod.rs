@@ -33,10 +33,10 @@ pub fn run(
     window
         .window()
         .on_winit_window_event(move |_window, event| {
-            if let winit::event::WindowEvent::Focused(true) = event {
-                if let Some(window) = window_for_focus_events.upgrade() {
-                    window.invoke_focus_input();
-                }
+            if let winit::event::WindowEvent::Focused(true) = event
+                && let Some(window) = window_for_focus_events.upgrade()
+            {
+                window.invoke_focus_input();
             }
 
             EventResult::Propagate
