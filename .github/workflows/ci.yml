@@ -77,7 +77,7 @@ jobs:
             -CompressionLevel Optimal
 
       - name: Upload ZIP artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: latchnott-windows-x86_64
           path: latchnott-windows-x86_64.zip
